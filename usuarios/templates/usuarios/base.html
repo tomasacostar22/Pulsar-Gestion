@@ -1,0 +1,17 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Proyectos{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Questrial&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Paytone+One&display=swap" rel="stylesheet" />
+    {% tailwind_css %}
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="min-h-screen bg-white questrial text-indigo-900">
+    <p>hola</p>
+    {% block content %}{% endblock %}
+  </body>
+</html>
