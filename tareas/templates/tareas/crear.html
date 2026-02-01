@@ -80,7 +80,7 @@
         >
           <option value="">Seleccionar usuario</option>
           {% for usuario in usuarios %}
-          <option value="{{ usuario.id }}">{{ usuario.email }}</option>
+          <option value="{{ usuario.id }}">{{ usuario.get_full_name }}</option>
           {% endfor %}
         </select>
       </div>
