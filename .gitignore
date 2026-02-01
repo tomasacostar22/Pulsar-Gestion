@@ -2,3 +2,4 @@
 venv
 db.sqlite3
 theme/static/css/dist/styles.css
+.DS_Store
