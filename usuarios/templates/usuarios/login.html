@@ -1,0 +1,50 @@
+{% extends "usuarios/base.html" %}
+
+{% block title %}Iniciar Sesion{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-white">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <h1 class="text-3xl font-bold text-center text-indigo-900 paytone-one-regular mb-2">Pulsar</h1>
+    <p class="text-center text-indigo-400 mb-8">Gestion de Tareas</p>
+
+    {% if error %}
+    <div class="bg-red-50 border border-red-300 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-5">
+        <label for="email" class="block text-sm font-medium text-indigo-700 mb-1">Correo electronico</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+          class="w-full px-4 py-2.5 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
+          placeholder="correo@ejemplo.com"
+        />
+      </div>
+      <div class="mb-6">
+        <label for="password" class="block text-sm font-medium text-indigo-700 mb-1">Contrasena</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          class="w-full px-4 py-2.5 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
+          placeholder="********"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition cursor-pointer"
+      >
+        Iniciar Sesion
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

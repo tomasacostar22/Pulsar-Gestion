@@ -1,0 +1,62 @@
+<!-- Header con tabs y boton crear -->
+<div class="flex items-center justify-between mb-6">
+  <div class="flex gap-2">
+    <a
+      href="?vista=realizar"
+      hx-get="/tareas/?vista=realizar"
+      hx-target="#contenido-tareas"
+      hx-push-url="true"
+      class="px-4 py-2 rounded-lg text-sm font-medium transition {% if vista == 'realizar' %}bg-indigo-600 text-white{% else %}bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50{% endif %}"
+    >
+      Mis tareas
+    </a>
+    <a
+      href="?vista=supervisar"
+      hx-get="/tareas/?vista=supervisar"
+      hx-target="#contenido-tareas"
+      hx-push-url="true"
+      class="px-4 py-2 rounded-lg text-sm font-medium transition {% if vista == 'supervisar' %}bg-indigo-600 text-white{% else %}bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50{% endif %}"
+    >
+      Tareas que superviso
+    </a>
+  </div>
+  <a
+    href="{% url 'crear_tarea' %}"
+    class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
+  >
+    + Nueva tarea
+  </a>
+</div>
+
+<!-- Lista de tareas -->
+{% if tareas %}
+<div class="space-y-3">
+  {% for tarea in tareas %}
+  <div class="bg-white rounded-xl border border-indigo-100 shadow-sm p-5">
+    <div class="flex items-center gap-3 mb-1">
+      <h3 class="font-semibold text-indigo-900">{{ tarea.nombre }}</h3>
+      <span class="text-xs px-2 py-0.5 rounded-full font-medium
+        {% if tarea.prioridad == 'ALTA' %}bg-red-100 text-red-700
+        {% elif tarea.prioridad == 'MEDIA' %}bg-yellow-100 text-yellow-700
+        {% else %}bg-green-100 text-green-700{% endif %}
+      ">{{ tarea.get_prioridad_display }}</span>
+    </div>
+    {% if tarea.descripcion %}
+    <p class="text-sm text-indigo-500 mb-2">{{ tarea.descripcion }}</p>
+    {% endif %}
+    <div class="flex gap-4 text-xs text-indigo-400">
+      {% if vista == "realizar" %}
+      <span>Supervisor: {{ tarea.supervisor.get_full_name }}</span>
+      {% else %}
+      <span>Responsable: {{ tarea.responsable.get_full_name }}</span>
+      {% endif %}
+      <span>Limite: {{ tarea.fecha_limite|date:"d/m/Y" }}</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-16 text-indigo-300">
+  <p class="text-lg">No hay tareas por aqui.</p>
+</div>
+{% endif %}

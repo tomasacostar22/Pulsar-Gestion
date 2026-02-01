@@ -1,0 +1,16 @@
+{% if anuncios %}
+  {% for anuncio in anuncios %}
+  <div class="px-5 py-3 {% if not forloop.last %}border-b border-indigo-50{% endif %}">
+    <p class="text-sm text-indigo-800">{{ anuncio.contenido }}</p>
+    <div class="flex items-center gap-2 mt-1.5 text-xs text-indigo-400">
+      <span class="font-medium">{{ anuncio.autor.email }}</span>
+      <span>&middot;</span>
+      <span>{{ anuncio.fecha_creacion|timesince }} atras</span>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="px-5 py-8 text-center text-sm text-indigo-300">
+    Sin anuncios aun.
+  </div>
+{% endif %}

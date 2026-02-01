@@ -1,0 +1,63 @@
+{% extends "usuarios/base.html" %}
+
+{% block title %}Tareas{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm border-b border-indigo-100">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <h1 class="text-xl font-bold text-indigo-900 paytone-one-regular">Pulsar</h1>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-indigo-600">{{ request.user.email }}</span>
+        <a href="{% url 'usuarios:logout' %}" class="text-sm text-indigo-400 hover:text-red-500 transition">Cerrar sesion</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-6 py-8 flex gap-6">
+    <!-- Columna izquierda: Tareas -->
+    <div id="contenido-tareas" class="flex-1 min-w-0">
+      {% include "tareas/parciales/lista_tareas.html" %}
+    </div>
+
+    <!-- Columna derecha: Anuncios -->
+    <aside class="w-80 shrink-0">
+      <div class="bg-white rounded-xl border border-indigo-100 shadow-sm sticky top-8">
+        <div class="px-5 py-4 border-b border-indigo-100">
+          <h2 class="font-bold text-indigo-900">Anuncios</h2>
+        </div>
+
+        <!-- Formulario para nuevo anuncio con htmx -->
+        <form
+          hx-post="{% url 'crear_anuncio' %}"
+          hx-target="#lista-anuncios"
+          hx-swap="innerHTML"
+          hx-on::after-request="this.reset()"
+          class="px-5 py-4 border-b border-indigo-50"
+        >
+          {% csrf_token %}
+          <textarea
+            name="contenido"
+            rows="2"
+            required
+            placeholder="Escribe un anuncio..."
+            class="w-full px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition resize-none"
+          ></textarea>
+          <button
+            type="submit"
+            class="mt-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-1.5 rounded-lg transition cursor-pointer"
+          >
+            Publicar
+          </button>
+        </form>
+
+        <!-- Lista de anuncios -->
+        <div id="lista-anuncios" class="max-h-[calc(100vh-20rem)] overflow-y-auto">
+          {% include "tareas/parciales/lista_anuncios.html" %}
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
