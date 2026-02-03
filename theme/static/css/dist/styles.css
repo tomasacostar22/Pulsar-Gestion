@@ -247,9 +247,6 @@
   .grid {
     display: grid;
   }
-  .hidden {
-    display: none;
-  }
   .max-h-\[calc\(100vh-20rem\)\] {
     max-height: calc(100vh - 20rem);
   }
@@ -294,9 +291,6 @@
   }
   .items-center {
     align-items: center;
-  }
-  .items-start {
-    align-items: flex-start;
   }
   .justify-between {
     justify-content: space-between;
