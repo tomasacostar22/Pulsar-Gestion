@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'theme',
     'tareas',
     'usuarios',
+    'mensajes',
 ]
 
 

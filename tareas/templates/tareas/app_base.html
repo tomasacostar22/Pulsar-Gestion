@@ -1,0 +1,100 @@
+{% extends "usuarios/base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm border-b border-indigo-100">
+    <div class="px-6 py-4 flex items-center justify-between">
+      <h1 class="text-xl font-bold text-indigo-900 paytone-one-regular">Pulsar - Gestor de Operaciones</h1>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-indigo-600">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+        <a href="{% url 'usuarios:cambiar_contrasena' %}" class="text-sm text-indigo-400 hover:text-indigo-600 transition" title="Cambiar contrasena">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          </svg>
+        </a>
+        <a href="{% url 'usuarios:logout' %}" class="text-sm text-indigo-400 hover:text-red-500 transition">Cerrar sesion</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="flex min-h-[calc(100vh-65px)]">
+    <!-- Menu lateral -->
+    <nav class="w-52 shrink-0 border-r border-indigo-100 pt-6 px-3">
+      <div class="sticky top-8 space-y-1">
+        <a href="{% url 'principal' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition {% if seccion_activa == 'tareas' %}text-indigo-900 bg-indigo-50{% else %}text-indigo-400 hover:text-indigo-700 hover:bg-indigo-50/50{% endif %}">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {% if seccion_activa == 'tareas' %}text-indigo-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+          Tareas
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition {% if seccion_activa == 'proyectos' %}text-indigo-900 bg-indigo-50{% else %}text-indigo-400 hover:text-indigo-700 hover:bg-indigo-50/50{% endif %}">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {% if seccion_activa == 'proyectos' %}text-indigo-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+          </svg>
+          Proyectos
+        </a>
+        <a href="{% url 'mensajes:bandeja' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition {% if seccion_activa == 'mensajes' %}text-indigo-900 bg-indigo-50{% else %}text-indigo-400 hover:text-indigo-700 hover:bg-indigo-50/50{% endif %}">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {% if seccion_activa == 'mensajes' %}text-indigo-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+          Mensajes
+        </a>
+      </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="flex-1 min-w-0 px-6 py-8 flex gap-6">
+      <!-- Contenido de la seccion -->
+      <div class="flex-1 min-w-0">
+        {% block seccion %}{% endblock %}
+      </div>
+
+      <!-- Columna derecha: Anuncios -->
+      <aside class="w-80 shrink-0">
+        <div class="bg-white rounded-xl border border-indigo-100 shadow-sm sticky top-8">
+          <div class="px-5 py-4 border-b border-indigo-100">
+            <h2 class="font-bold text-indigo-900">Anuncios</h2>
+          </div>
+
+          <!-- Formulario para nuevo anuncio con htmx -->
+          <form
+            hx-post="{% url 'crear_anuncio' %}"
+            hx-target="#lista-anuncios"
+            hx-swap="innerHTML"
+            hx-on::after-request="this.reset()"
+            class="px-5 py-4 border-b border-indigo-50"
+          >
+            {% csrf_token %}
+            <input
+              type="text"
+              name="titulo"
+              required
+              placeholder="Titulo del anuncio..."
+              class="w-full px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition mb-2"
+            >
+            <textarea
+              name="contenido"
+              rows="2"
+              required
+              placeholder="Escribe un anuncio..."
+              class="w-full px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition resize-none"
+            ></textarea>
+            <button
+              type="submit"
+              class="mt-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-1.5 rounded-lg transition cursor-pointer"
+            >
+              Publicar
+            </button>
+          </form>
+
+          <!-- Lista de anuncios -->
+          <div id="lista-anuncios" class="max-h-[calc(100vh-20rem)] overflow-y-auto">
+            {% include "tareas/parciales/lista_anuncios.html" %}
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}

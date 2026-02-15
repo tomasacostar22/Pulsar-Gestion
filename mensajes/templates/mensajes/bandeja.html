@@ -1,0 +1,9 @@
+{% extends "tareas/app_base.html" %}
+
+{% block title %}Mensajes{% endblock %}
+
+{% block seccion %}
+<div id="contenido-mensajes">
+  {% include "mensajes/parciales/lista_mensajes.html" %}
+</div>
+{% endblock %}

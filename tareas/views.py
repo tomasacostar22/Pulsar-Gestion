@@ -22,7 +22,7 @@ def principal(request):
 
     anuncios = Anuncio.objects.select_related("autor").all()[:20]
 
-    context = {"tareas": tareas, "vista": vista, "estado": estado, "anuncios": anuncios}
+    context = {"tareas": tareas, "vista": vista, "estado": estado, "anuncios": anuncios, "seccion_activa": "tareas"}
 
     if request.headers.get("HX-Request"):
         return render(request, "tareas/parciales/lista_tareas.html", context)
