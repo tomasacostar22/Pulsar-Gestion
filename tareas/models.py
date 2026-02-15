@@ -9,6 +9,10 @@ class Tarea(models.Model):
         MEDIA = "MEDIA", "Media"
         BAJA = "BAJA", "Baja"
 
+    class Estado(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente"
+        FINALIZADA = "FINALIZADA", "Finalizada"
+
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -27,6 +31,11 @@ class Tarea(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="tareas_supervisar",
+    )
+    estado = models.CharField(
+        max_length=10,
+        choices=Estado.choices,
+        default=Estado.PENDIENTE,
     )
 
     def __str__(self):
