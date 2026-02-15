@@ -9,6 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Paytone+One&display=swap" rel="stylesheet" />
     {% tailwind_css %}
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+          if (csrfToken) {
+            evt.detail.headers['X-CSRFToken'] = csrfToken.value;
+          }
+        });
+      });
+    </script>
     {% block extra_head %}{% endblock %}
   </head>
   <body class="min-h-screen bg-white questrial text-indigo-900">

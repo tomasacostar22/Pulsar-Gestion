@@ -28,17 +28,35 @@ def principal(request):
 @login_required
 def crear_anuncio(request):
     if request.method == "POST":
+        titulo = request.POST.get("titulo", "").strip()
         contenido = request.POST.get("contenido", "").strip()
-        if contenido:
-            Anuncio.objects.create(autor=request.user, contenido=contenido)
+        if titulo and contenido:
+            Anuncio.objects.create(autor=request.user, titulo=titulo, contenido=contenido)
 
     anuncios = Anuncio.objects.select_related("autor").all()[:20]
 
     if request.headers.get("HX-Request"):
-        return render(request, "tareas/parciales/lista_anuncios.html", {"anuncios": anuncios})
+        return render(request, "tareas/parciales/lista_anuncios.html", {"anuncios": anuncios, "user": request.user})
 
     vista = request.POST.get("vista", "realizar")
     return redirect(f"/tareas/?vista={vista}")
+
+
+@login_required
+def eliminar_anuncio(request, anuncio_id):
+    if request.method == "POST":
+        try:
+            anuncio = Anuncio.objects.get(id=anuncio_id, autor=request.user)
+            anuncio.delete()
+        except Anuncio.DoesNotExist:
+            pass
+
+    anuncios = Anuncio.objects.select_related("autor").all()[:20]
+
+    if request.headers.get("HX-Request"):
+        return render(request, "tareas/parciales/lista_anuncios.html", {"anuncios": anuncios, "user": request.user})
+
+    return redirect("/tareas/")
 
 
 @login_required

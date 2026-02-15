@@ -39,6 +39,7 @@ class Anuncio(models.Model):
         on_delete=models.CASCADE,
         related_name="anuncios",
     )
+    titulo = models.CharField(max_length=100, default="Sin titulo")
     contenido = models.TextField()
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 

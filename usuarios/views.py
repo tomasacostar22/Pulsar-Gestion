@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
 
 
 def login_view(request):
@@ -31,3 +32,28 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("usuarios:login")
+
+
+@login_required
+def cambiar_contrasena(request):
+    error = None
+    exito = False
+
+    if request.method == "POST":
+        actual = request.POST.get("actual", "")
+        nueva = request.POST.get("nueva", "")
+        confirmar = request.POST.get("confirmar", "")
+
+        if not request.user.check_password(actual):
+            error = "La contrasena actual es incorrecta."
+        elif len(nueva) < 6:
+            error = "La nueva contrasena debe tener al menos 6 caracteres."
+        elif nueva != confirmar:
+            error = "Las contrasenas no coinciden."
+        else:
+            request.user.set_password(nueva)
+            request.user.save()
+            update_session_auth_hash(request, request.user)
+            exito = True
+
+    return render(request, "usuarios/cambiar_contrasena.html", {"error": error, "exito": exito})
