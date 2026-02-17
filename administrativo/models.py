@@ -1,5 +1,11 @@
+import datetime
+
 from django.db import models
 from django.conf import settings
+
+ENTRADA_DEFAULT = datetime.time(7, 0)
+SALIDA_DEFAULT = datetime.time(16, 0)
+SALIDA_SABADO_DEFAULT = datetime.time(12, 0)
 
 
 class HorarioLaboral(models.Model):
@@ -9,23 +15,23 @@ class HorarioLaboral(models.Model):
         related_name="horario_laboral",
     )
 
-    lunes_entrada = models.TimeField(default="07:00")
-    lunes_salida = models.TimeField(default="16:00")
+    lunes_entrada = models.TimeField(default=ENTRADA_DEFAULT)
+    lunes_salida = models.TimeField(default=SALIDA_DEFAULT)
 
-    martes_entrada = models.TimeField(default="07:00")
-    martes_salida = models.TimeField(default="16:00")
+    martes_entrada = models.TimeField(default=ENTRADA_DEFAULT)
+    martes_salida = models.TimeField(default=SALIDA_DEFAULT)
 
-    miercoles_entrada = models.TimeField(default="07:00")
-    miercoles_salida = models.TimeField(default="16:00")
+    miercoles_entrada = models.TimeField(default=ENTRADA_DEFAULT)
+    miercoles_salida = models.TimeField(default=SALIDA_DEFAULT)
 
-    jueves_entrada = models.TimeField(default="07:00")
-    jueves_salida = models.TimeField(default="16:00")
+    jueves_entrada = models.TimeField(default=ENTRADA_DEFAULT)
+    jueves_salida = models.TimeField(default=SALIDA_DEFAULT)
 
-    viernes_entrada = models.TimeField(default="07:00")
-    viernes_salida = models.TimeField(default="16:00")
+    viernes_entrada = models.TimeField(default=ENTRADA_DEFAULT)
+    viernes_salida = models.TimeField(default=SALIDA_DEFAULT)
 
-    sabado_entrada = models.TimeField(default="07:00")
-    sabado_salida = models.TimeField(default="12:00")
+    sabado_entrada = models.TimeField(default=ENTRADA_DEFAULT)
+    sabado_salida = models.TimeField(default=SALIDA_SABADO_DEFAULT)
 
     class Meta:
         verbose_name = "Horario Laboral"

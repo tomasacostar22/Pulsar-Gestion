@@ -24,7 +24,9 @@ def horarios(request):
             empleado = None
 
         if empleado:
-            horario, _ = HorarioLaboral.objects.get_or_create(empleado=empleado)
+            horario, created = HorarioLaboral.objects.get_or_create(empleado=empleado)
+            if created:
+                horario.refresh_from_db()
 
             if request.method == "POST":
                 for dia in DIAS:
