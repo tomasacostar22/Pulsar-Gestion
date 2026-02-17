@@ -64,7 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'administrativo.middleware.GerenciaMiddleware',
+    'config.middleware.GerenciaMiddleware',
 ]
 
 if DEBUG:

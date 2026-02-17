@@ -8,11 +8,7 @@ class UsuarioAdmin(UserAdmin):
     # Campos que se muestran en la lista de usuarios
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active')
     
-    # Campo que abre el formulario de edición
-    list_display_links = ('username',)
-
-    # Campos editables directamente desde la lista (opcional)
-    list_editable = ('email', 'first_name', 'last_name', 'is_staff', 'is_active')
+    list_display_links = ('username', 'email', 'first_name', 'last_name')
     
     # Filtros en la barra lateral
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
