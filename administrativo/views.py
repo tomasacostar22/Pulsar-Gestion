@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 
 from .models import HorarioLaboral
+from tareas.models import Tarea
 
 Usuario = get_user_model()
 
@@ -49,6 +50,7 @@ def horarios(request):
 
     context = {
         "seccion_activa": "administrativo",
+        "subseccion": "horarios",
         "empleados": empleados,
         "empleado_id": int(empleado_id) if empleado_id else None,
         "horario": horario,
@@ -60,3 +62,40 @@ def horarios(request):
         return render(request, "administrativo/parciales/horario_form.html", context)
 
     return render(request, "administrativo/horarios.html", context)
+
+
+@login_required
+def supervisar_tareas(request):
+    estado = request.GET.get("estado", "")
+    prioridad = request.GET.get("prioridad", "")
+    empleado_id = request.GET.get("empleado", "")
+
+    tareas = Tarea.objects.select_related("responsable", "supervisor").all()
+
+    if estado:
+        tareas = tareas.filter(estado=estado)
+    if prioridad:
+        tareas = tareas.filter(prioridad=prioridad)
+    if empleado_id:
+        tareas = tareas.filter(responsable_id=empleado_id)
+
+    tareas = tareas.order_by("-fecha_creacion")
+
+    empleados = Usuario.objects.all().order_by("first_name", "last_name")
+
+    context = {
+        "seccion_activa": "administrativo",
+        "subseccion": "supervisar_tareas",
+        "tareas": tareas,
+        "empleados": empleados,
+        "estado_actual": estado,
+        "prioridad_actual": prioridad,
+        "empleado_actual": int(empleado_id) if empleado_id else None,
+        "estados": Tarea.Estado.choices,
+        "prioridades": Tarea.Prioridad.choices,
+    }
+
+    if request.headers.get("HX-Request"):
+        return render(request, "administrativo/parciales/lista_tareas_admin.html", context)
+
+    return render(request, "administrativo/supervisar_tareas.html", context)

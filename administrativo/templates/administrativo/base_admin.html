@@ -1,0 +1,27 @@
+{% extends "tareas/app_base.html" %}
+
+{% block submenu %}
+<nav class="w-52 shrink-0 border-r border-indigo-100 pt-6 px-3">
+  <div class="sticky top-8 space-y-1">
+    <p class="px-3 mb-2 text-xs font-semibold text-indigo-300 uppercase tracking-wider">Administrativo</p>
+    <a
+      href="{% url 'administrativo:horarios' %}"
+      class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition {% if subseccion == 'horarios' %}text-indigo-900 bg-indigo-50{% else %}text-indigo-400 hover:text-indigo-700 hover:bg-indigo-50/50{% endif %}"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {% if subseccion == 'horarios' %}text-indigo-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Horarios laborales
+    </a>
+    <a
+      href="{% url 'administrativo:supervisar_tareas' %}"
+      class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition {% if subseccion == 'supervisar_tareas' %}text-indigo-900 bg-indigo-50{% else %}text-indigo-400 hover:text-indigo-700 hover:bg-indigo-50/50{% endif %}"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {% if subseccion == 'supervisar_tareas' %}text-indigo-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+      Supervisar tareas
+    </a>
+  </div>
+</nav>
+{% endblock %}

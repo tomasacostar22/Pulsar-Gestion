@@ -5,8 +5,11 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, AnonymousUser
 
+from django.utils import timezone
+
 from .models import HorarioLaboral
 from .context_processors import permisos_administrativo
+from tareas.models import Tarea
 
 Usuario = get_user_model()
 
@@ -151,3 +154,65 @@ class ContextProcessorTest(TestCase):
         request.user = AnonymousUser()
         ctx = permisos_administrativo(request)
         self.assertFalse(ctx["es_gerencia"])
+
+
+class SupervisarTareasViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.grupo = Group.objects.create(name="Gerencia")
+        self.gerente = Usuario.objects.create_user(username="gerente", email="gerente@test.com", password="pass123")
+        self.gerente.groups.add(self.grupo)
+        self.empleado = Usuario.objects.create_user(username="pedro", email="pedro@test.com", password="pass123")
+        self.client.login(username="gerente", password="pass123")
+        self.url = reverse("administrativo:supervisar_tareas")
+        limite = timezone.now() + timezone.timedelta(days=7)
+        self.tarea1 = Tarea.objects.create(
+            nombre="Tarea alta", responsable=self.empleado, supervisor=self.gerente,
+            prioridad="ALTA", estado="PENDIENTE", fecha_limite=limite,
+        )
+        self.tarea2 = Tarea.objects.create(
+            nombre="Tarea finalizada", responsable=self.empleado, supervisor=self.gerente,
+            prioridad="BAJA", estado="FINALIZADA", fecha_limite=limite,
+        )
+
+    def test_requiere_login(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_requiere_gerencia(self):
+        self.client.login(username="pedro", password="pass123")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_muestra_todas_las_tareas(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Tarea alta")
+        self.assertContains(response, "Tarea finalizada")
+
+    def test_filtro_estado(self):
+        response = self.client.get(self.url + "?estado=PENDIENTE", HTTP_HX_REQUEST="true")
+        self.assertContains(response, "Tarea alta")
+        self.assertNotContains(response, "Tarea finalizada")
+
+    def test_filtro_prioridad(self):
+        response = self.client.get(self.url + "?prioridad=BAJA", HTTP_HX_REQUEST="true")
+        self.assertNotContains(response, "Tarea alta")
+        self.assertContains(response, "Tarea finalizada")
+
+    def test_filtro_empleado(self):
+        otro = Usuario.objects.create_user(username="otro", email="otro@test.com", password="pass123")
+        limite = timezone.now() + timezone.timedelta(days=7)
+        Tarea.objects.create(nombre="Tarea otro", responsable=otro, supervisor=self.gerente, fecha_limite=limite)
+        response = self.client.get(self.url + f"?empleado={otro.id}", HTTP_HX_REQUEST="true")
+        self.assertContains(response, "Tarea otro")
+        self.assertNotContains(response, "Tarea alta")
+
+    def test_htmx_devuelve_parcial(self):
+        response = self.client.get(self.url, HTTP_HX_REQUEST="true")
+        self.assertTemplateUsed(response, "administrativo/parciales/lista_tareas_admin.html")
+
+    def test_get_normal_devuelve_pagina_completa(self):
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "administrativo/supervisar_tareas.html")

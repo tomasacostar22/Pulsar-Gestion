@@ -1,0 +1,70 @@
+{% extends "administrativo/base_admin.html" %}
+
+{% block title %}Supervisar Tareas{% endblock %}
+
+{% block seccion %}
+<div class="max-w-5xl">
+  <h2 class="text-2xl font-bold text-indigo-900 mb-6">Supervisar tareas</h2>
+
+  <!-- Filtros -->
+  <div class="bg-white rounded-xl border border-indigo-100 shadow-sm p-5 mb-6">
+    <div class="flex flex-wrap gap-4 items-end">
+      <div>
+        <label class="block text-xs font-medium text-indigo-500 mb-1">Estado</label>
+        <select
+          name="estado"
+          hx-get="{% url 'administrativo:supervisar_tareas' %}"
+          hx-target="#lista-tareas-admin"
+          hx-swap="innerHTML"
+          hx-include="[name='prioridad'],[name='empleado']"
+          class="px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
+        >
+          <option value="">Todos</option>
+          {% for value, label in estados %}
+            <option value="{{ value }}" {% if estado_actual == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-indigo-500 mb-1">Prioridad</label>
+        <select
+          name="prioridad"
+          hx-get="{% url 'administrativo:supervisar_tareas' %}"
+          hx-target="#lista-tareas-admin"
+          hx-swap="innerHTML"
+          hx-include="[name='estado'],[name='empleado']"
+          class="px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
+        >
+          <option value="">Todas</option>
+          {% for value, label in prioridades %}
+            <option value="{{ value }}" {% if prioridad_actual == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-indigo-500 mb-1">Responsable</label>
+        <select
+          name="empleado"
+          hx-get="{% url 'administrativo:supervisar_tareas' %}"
+          hx-target="#lista-tareas-admin"
+          hx-swap="innerHTML"
+          hx-include="[name='estado'],[name='prioridad']"
+          class="px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
+        >
+          <option value="">Todos</option>
+          {% for emp in empleados %}
+            <option value="{{ emp.id }}" {% if empleado_actual == emp.id %}selected{% endif %}>
+              {{ emp.first_name }} {{ emp.last_name }}{% if not emp.first_name %} {{ emp.username }}{% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de tareas -->
+  <div id="lista-tareas-admin">
+    {% include "administrativo/parciales/lista_tareas_admin.html" %}
+  </div>
+</div>
+{% endblock %}
