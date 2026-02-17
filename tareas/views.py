@@ -10,13 +10,16 @@ Usuario = get_user_model()
 
 @login_required
 def principal(request):
-    vista = request.GET.get("vista", "realizar")
+    vista = request.GET.get("vista", "propias")
     estado = request.GET.get("estado", "PENDIENTE")
 
     if vista == "supervisar":
-        tareas = Tarea.objects.filter(supervisor=request.user)
+        tareas = Tarea.objects.filter(supervisor=request.user).exclude(responsable=request.user)
+    elif vista == "asignadas":
+        tareas = Tarea.objects.filter(responsable=request.user).exclude(supervisor=request.user)
     else:
-        tareas = Tarea.objects.filter(responsable=request.user)
+        # propias: autoasignadas (soy responsable Y supervisor)
+        tareas = Tarea.objects.filter(responsable=request.user, supervisor=request.user)
 
     tareas = tareas.filter(estado=estado).order_by("-fecha_creacion")
 
@@ -66,7 +69,9 @@ def eliminar_anuncio(request, anuncio_id):
 
 @login_required
 def crear_tarea(request):
-    usuarios = Usuario.objects.all()
+    modo = request.GET.get("modo", request.POST.get("modo", ""))
+    es_propia = modo == "propia"
+    usuarios = Usuario.objects.exclude(id=request.user.id) if not es_propia else None
     error = None
 
     if request.method == "POST":
@@ -74,9 +79,13 @@ def crear_tarea(request):
         descripcion = request.POST.get("descripcion", "").strip()
         fecha_limite = request.POST.get("fecha_limite", "")
         prioridad = request.POST.get("prioridad", "MEDIA")
-        responsable_id = request.POST.get("responsable", "")
 
-        if not nombre or not fecha_limite or not responsable_id:
+        if es_propia:
+            responsable_id = request.user.id
+        else:
+            responsable_id = request.POST.get("responsable", "")
+
+        if not nombre or not fecha_limite or (not es_propia and not responsable_id):
             error = "Todos los campos obligatorios deben completarse."
         else:
             Tarea.objects.create(
@@ -87,12 +96,15 @@ def crear_tarea(request):
                 responsable_id=responsable_id,
                 supervisor=request.user,
             )
+            if es_propia:
+                return redirect("/tareas/?vista=propias")
             return redirect("/tareas/?vista=supervisar")
 
     return render(request, "tareas/crear.html", {
         "usuarios": usuarios,
         "prioridades": Tarea.Prioridad.choices,
         "error": error,
+        "es_propia": es_propia,
     })
 
 
@@ -101,16 +113,44 @@ def finalizar_tarea(request, tarea_id):
     tarea = get_object_or_404(Tarea, id=tarea_id)
 
     if request.user != tarea.responsable:
-        return HttpResponseForbidden("No tenés permiso para finalizar esta tarea.")
+        return HttpResponseForbidden("No tenes permiso para finalizar esta tarea.")
 
     if request.method == "POST":
         tarea.estado = Tarea.Estado.FINALIZADA
         tarea.save()
 
-    vista = request.GET.get("vista", "realizar")
+    vista = request.GET.get("vista", "propias")
     estado = request.GET.get("estado", "PENDIENTE")
 
-    tareas = Tarea.objects.filter(responsable=request.user, estado=estado).order_by("-fecha_creacion")
+    if vista == "propias":
+        tareas = Tarea.objects.filter(responsable=request.user, supervisor=request.user)
+    else:
+        tareas = Tarea.objects.filter(responsable=request.user).exclude(supervisor=request.user)
+
+    tareas = tareas.filter(estado=estado).order_by("-fecha_creacion")
+    context = {"tareas": tareas, "vista": vista, "estado": estado}
+
+    if request.headers.get("HX-Request"):
+        return render(request, "tareas/parciales/lista_tareas.html", context)
+
+    return redirect(f"/tareas/?vista={vista}&estado={estado}")
+
+
+@login_required
+def cancelar_tarea(request, tarea_id):
+    tarea = get_object_or_404(Tarea, id=tarea_id)
+
+    if request.user != tarea.supervisor:
+        return HttpResponseForbidden("No tenes permiso para cancelar esta tarea.")
+
+    if request.method == "POST" and tarea.estado == Tarea.Estado.PENDIENTE:
+        tarea.estado = Tarea.Estado.CANCELADA
+        tarea.save()
+
+    vista = request.GET.get("vista", "supervisar")
+    estado = request.GET.get("estado", "PENDIENTE")
+
+    tareas = Tarea.objects.filter(supervisor=request.user).exclude(responsable=request.user).filter(estado=estado).order_by("-fecha_creacion")
     context = {"tareas": tareas, "vista": vista, "estado": estado}
 
     if request.headers.get("HX-Request"):

@@ -1,31 +1,25 @@
-<!-- Header con tabs y boton crear -->
+<!-- Header con boton crear -->
 <div class="flex items-center justify-between mb-4">
-  <div class="flex gap-2">
-    <a
-      href="?vista=realizar"
-      hx-get="/tareas/?vista=realizar&estado={{ estado }}"
-      hx-target="#contenido-tareas"
-      hx-push-url="true"
-      class="px-4 py-2 rounded-lg text-sm font-medium transition {% if vista == 'realizar' %}bg-indigo-600 text-white{% else %}bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50{% endif %}"
-    >
-      Mis tareas
-    </a>
-    <a
-      href="?vista=supervisar"
-      hx-get="/tareas/?vista=supervisar&estado={{ estado }}"
-      hx-target="#contenido-tareas"
-      hx-push-url="true"
-      class="px-4 py-2 rounded-lg text-sm font-medium transition {% if vista == 'supervisar' %}bg-indigo-600 text-white{% else %}bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50{% endif %}"
-    >
-      Tareas que superviso
-    </a>
-  </div>
+  <h2 class="text-xl font-bold text-indigo-900">
+    {% if vista == 'propias' %}Tareas propias
+    {% elif vista == 'asignadas' %}Asignadas a mi
+    {% else %}Tareas que superviso{% endif %}
+  </h2>
+  {% if vista == 'propias' %}
   <a
-    href="{% url 'crear_tarea' %}"
+    href="{% url 'crear_tarea' %}?modo=propia"
     class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
   >
     + Nueva tarea
   </a>
+  {% elif vista == 'supervisar' %}
+  <a
+    href="{% url 'crear_tarea' %}"
+    class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
+  >
+    + Asignar tarea
+  </a>
+  {% endif %}
 </div>
 
 <!-- Filtro por estado -->
@@ -48,6 +42,15 @@
   >
     Finalizadas
   </a>
+  <a
+    href="?vista={{ vista }}&estado=CANCELADA"
+    hx-get="/tareas/?vista={{ vista }}&estado=CANCELADA"
+    hx-target="#contenido-tareas"
+    hx-push-url="true"
+    class="px-3 py-1.5 rounded-full text-xs font-medium transition {% if estado == 'CANCELADA' %}bg-red-500 text-white{% else %}bg-red-100 text-red-700 hover:bg-red-200{% endif %}"
+  >
+    Canceladas
+  </a>
 </div>
 
 <!-- Lista de tareas -->
@@ -65,28 +68,40 @@
         ">{{ tarea.get_prioridad_display }}</span>
         <span class="text-xs px-2 py-0.5 rounded-full font-medium
           {% if tarea.estado == 'FINALIZADA' %}bg-emerald-100 text-emerald-700
+          {% elif tarea.estado == 'CANCELADA' %}bg-red-100 text-red-700
           {% else %}bg-yellow-100 text-yellow-700{% endif %}
         ">{{ tarea.get_estado_display }}</span>
       </div>
-      {% if vista == 'realizar' and tarea.estado == 'PENDIENTE' %}
-      <button
-        hx-post="/tareas/{{ tarea.id }}/finalizar/?vista={{ vista }}&estado={{ estado }}"
-        hx-target="#contenido-tareas"
-        hx-swap="innerHTML"
-        class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition"
-      >
-        Finalizar
-      </button>
+      {% if tarea.estado == 'PENDIENTE' %}
+        {% if vista == 'propias' or vista == 'asignadas' %}
+        <button
+          hx-post="/tareas/{{ tarea.id }}/finalizar/?vista={{ vista }}&estado={{ estado }}"
+          hx-target="#contenido-tareas"
+          hx-swap="innerHTML"
+          class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition"
+        >
+          Finalizar
+        </button>
+        {% elif vista == 'supervisar' %}
+        <button
+          hx-post="/tareas/{{ tarea.id }}/cancelar/?vista={{ vista }}&estado={{ estado }}"
+          hx-target="#contenido-tareas"
+          hx-swap="innerHTML"
+          class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition"
+        >
+          Cancelar
+        </button>
+        {% endif %}
       {% endif %}
     </div>
     {% if tarea.descripcion %}
     <p class="text-sm text-indigo-500 mb-2">{{ tarea.descripcion }}</p>
     {% endif %}
     <div class="flex gap-4 text-xs text-indigo-400">
-      {% if vista == "realizar" %}
-      <span>Supervisor: {{ tarea.supervisor.get_full_name }}</span>
-      {% else %}
+      {% if vista == "supervisar" %}
       <span>Responsable: {{ tarea.responsable.get_full_name }}</span>
+      {% elif vista == "asignadas" %}
+      <span>Supervisor: {{ tarea.supervisor.get_full_name }}</span>
       {% endif %}
       <span>Limite: {{ tarea.fecha_limite|date:"d/m/Y" }}</span>
     </div>

@@ -12,6 +12,7 @@ class Tarea(models.Model):
     class Estado(models.TextChoices):
         PENDIENTE = "PENDIENTE", "Pendiente"
         FINALIZADA = "FINALIZADA", "Finalizada"
+        CANCELADA = "CANCELADA", "Cancelada"
 
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
