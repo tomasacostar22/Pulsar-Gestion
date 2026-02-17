@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'tareas',
     'usuarios',
     'mensajes',
+    'administrativo',
 ]
 
 
@@ -63,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'administrativo.middleware.GerenciaMiddleware',
 ]
 
 if DEBUG:
@@ -82,6 +84,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'administrativo.context_processors.permisos_administrativo',
             ],
         },
     },

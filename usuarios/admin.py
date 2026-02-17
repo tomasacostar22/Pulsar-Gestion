@@ -19,6 +19,9 @@ class UsuarioAdmin(UserAdmin):
     
     # Barra de búsqueda
     search_fields = ('username', 'first_name', 'last_name', 'email')
+
+    # Widget de selección doble para grupos y permisos
+    filter_horizontal = ('groups', 'user_permissions')
     
     # Organización de campos en el formulario de edición
     fieldsets = (
