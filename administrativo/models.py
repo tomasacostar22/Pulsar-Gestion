@@ -17,21 +17,33 @@ class HorarioLaboral(models.Model):
 
     lunes_entrada = models.TimeField(default=ENTRADA_DEFAULT)
     lunes_salida = models.TimeField(default=SALIDA_DEFAULT)
+    lunes_entrada_2 = models.TimeField(null=True, blank=True)
+    lunes_salida_2 = models.TimeField(null=True, blank=True)
 
     martes_entrada = models.TimeField(default=ENTRADA_DEFAULT)
     martes_salida = models.TimeField(default=SALIDA_DEFAULT)
+    martes_entrada_2 = models.TimeField(null=True, blank=True)
+    martes_salida_2 = models.TimeField(null=True, blank=True)
 
     miercoles_entrada = models.TimeField(default=ENTRADA_DEFAULT)
     miercoles_salida = models.TimeField(default=SALIDA_DEFAULT)
+    miercoles_entrada_2 = models.TimeField(null=True, blank=True)
+    miercoles_salida_2 = models.TimeField(null=True, blank=True)
 
     jueves_entrada = models.TimeField(default=ENTRADA_DEFAULT)
     jueves_salida = models.TimeField(default=SALIDA_DEFAULT)
+    jueves_entrada_2 = models.TimeField(null=True, blank=True)
+    jueves_salida_2 = models.TimeField(null=True, blank=True)
 
     viernes_entrada = models.TimeField(default=ENTRADA_DEFAULT)
     viernes_salida = models.TimeField(default=SALIDA_DEFAULT)
+    viernes_entrada_2 = models.TimeField(null=True, blank=True)
+    viernes_salida_2 = models.TimeField(null=True, blank=True)
 
     sabado_entrada = models.TimeField(default=ENTRADA_DEFAULT)
     sabado_salida = models.TimeField(default=SALIDA_SABADO_DEFAULT)
+    sabado_entrada_2 = models.TimeField(null=True, blank=True)
+    sabado_salida_2 = models.TimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Horario Laboral"
@@ -43,25 +55,23 @@ class HorarioLaboral(models.Model):
     @property
     def dias(self):
         return [
-            ("Lunes", self.lunes_entrada, self.lunes_salida),
-            ("Martes", self.martes_entrada, self.martes_salida),
-            ("Miercoles", self.miercoles_entrada, self.miercoles_salida),
-            ("Jueves", self.jueves_entrada, self.jueves_salida),
-            ("Viernes", self.viernes_entrada, self.viernes_salida),
-            ("Sabado", self.sabado_entrada, self.sabado_salida),
+            ("Lunes", self.lunes_entrada, self.lunes_salida, self.lunes_entrada_2, self.lunes_salida_2),
+            ("Martes", self.martes_entrada, self.martes_salida, self.martes_entrada_2, self.martes_salida_2),
+            ("Miercoles", self.miercoles_entrada, self.miercoles_salida, self.miercoles_entrada_2, self.miercoles_salida_2),
+            ("Jueves", self.jueves_entrada, self.jueves_salida, self.jueves_entrada_2, self.jueves_salida_2),
+            ("Viernes", self.viernes_entrada, self.viernes_salida, self.viernes_entrada_2, self.viernes_salida_2),
+            ("Sabado", self.sabado_entrada, self.sabado_salida, self.sabado_entrada_2, self.sabado_salida_2),
         ]
 
     @property
     def total_horas_semana(self):
         total_minutos = 0
-        for _, entrada, salida in self.dias:
-            diff = (
-                salida.hour * 60 + salida.minute
-            ) - (
-                entrada.hour * 60 + entrada.minute
-            )
-            if diff > 0:
-                total_minutos += diff
+        for _, entrada, salida, entrada_2, salida_2 in self.dias:
+            for e, s in [(entrada, salida), (entrada_2, salida_2)]:
+                if e and s:
+                    diff = (s.hour * 60 + s.minute) - (e.hour * 60 + e.minute)
+                    if diff > 0:
+                        total_minutos += diff
         horas = total_minutos // 60
         minutos = total_minutos % 60
         if minutos:

@@ -44,6 +44,26 @@ class HorarioLaboralModelTest(TestCase):
     def test_dias_devuelve_6_elementos(self):
         self.assertEqual(len(self.horario.dias), 6)
 
+    def test_dias_incluye_segundo_bloque(self):
+        for dia in self.horario.dias:
+            self.assertEqual(len(dia), 5)  # nombre, entrada, salida, entrada_2, salida_2
+
+    def test_segundo_bloque_nulo_por_defecto(self):
+        for dia in ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]:
+            self.assertIsNone(getattr(self.horario, f"{dia}_entrada_2"))
+            self.assertIsNone(getattr(self.horario, f"{dia}_salida_2"))
+
+    def test_total_horas_con_segundo_bloque(self):
+        # Lunes: bloque1 07:00-12:00 (5h) + bloque2 13:00-16:00 (3h) = 8h
+        # Resto igual que default: martes-viernes 9h c/u = 36h, sabado 5h
+        # Total = 8 + 36 + 5 = 49h
+        self.horario.lunes_salida = datetime.time(12, 0)
+        self.horario.lunes_entrada_2 = datetime.time(13, 0)
+        self.horario.lunes_salida_2 = datetime.time(16, 0)
+        self.horario.save()
+        self.horario.refresh_from_db()
+        self.assertEqual(self.horario.total_horas_semana, "49h")
+
     def test_one_to_one_constraint(self):
         with self.assertRaises(Exception):
             HorarioLaboral.objects.create(empleado=self.user)
@@ -91,6 +111,40 @@ class HorariosViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         horario = HorarioLaboral.objects.get(empleado=self.empleado)
         self.assertEqual(horario.lunes_entrada, datetime.time(8, 0))
+
+    def test_post_guarda_segundo_bloque(self):
+        HorarioLaboral.objects.create(empleado=self.empleado)
+        response = self.client.post(self.url + f"?empleado={self.empleado.id}", {
+            "lunes_entrada": "07:00", "lunes_salida": "12:00",
+            "lunes_entrada_2": "13:00", "lunes_salida_2": "16:00",
+            "martes_entrada": "08:00", "martes_salida": "17:00",
+            "miercoles_entrada": "08:00", "miercoles_salida": "17:00",
+            "jueves_entrada": "08:00", "jueves_salida": "17:00",
+            "viernes_entrada": "08:00", "viernes_salida": "17:00",
+            "sabado_entrada": "08:00", "sabado_salida": "13:00",
+        })
+        self.assertEqual(response.status_code, 200)
+        horario = HorarioLaboral.objects.get(empleado=self.empleado)
+        self.assertEqual(horario.lunes_entrada_2, datetime.time(13, 0))
+        self.assertEqual(horario.lunes_salida_2, datetime.time(16, 0))
+
+    def test_post_limpia_segundo_bloque_si_vacio(self):
+        horario = HorarioLaboral.objects.create(empleado=self.empleado)
+        horario.lunes_entrada_2 = datetime.time(13, 0)
+        horario.lunes_salida_2 = datetime.time(16, 0)
+        horario.save()
+        self.client.post(self.url + f"?empleado={self.empleado.id}", {
+            "lunes_entrada": "08:00", "lunes_salida": "17:00",
+            "lunes_entrada_2": "", "lunes_salida_2": "",
+            "martes_entrada": "08:00", "martes_salida": "17:00",
+            "miercoles_entrada": "08:00", "miercoles_salida": "17:00",
+            "jueves_entrada": "08:00", "jueves_salida": "17:00",
+            "viernes_entrada": "08:00", "viernes_salida": "17:00",
+            "sabado_entrada": "08:00", "sabado_salida": "13:00",
+        })
+        horario.refresh_from_db()
+        self.assertIsNone(horario.lunes_entrada_2)
+        self.assertIsNone(horario.lunes_salida_2)
 
     def test_htmx_get_devuelve_parcial(self):
         response = self.client.get(

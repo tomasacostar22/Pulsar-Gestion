@@ -33,10 +33,14 @@ def horarios(request):
                 for dia in DIAS:
                     entrada = request.POST.get(f"{dia}_entrada")
                     salida = request.POST.get(f"{dia}_salida")
+                    entrada_2 = request.POST.get(f"{dia}_entrada_2") or None
+                    salida_2 = request.POST.get(f"{dia}_salida_2") or None
                     if entrada:
                         setattr(horario, f"{dia}_entrada", entrada)
                     if salida:
                         setattr(horario, f"{dia}_salida", salida)
+                    setattr(horario, f"{dia}_entrada_2", entrada_2)
+                    setattr(horario, f"{dia}_salida_2", salida_2)
                 horario.save()
                 horario.refresh_from_db()
                 mensaje = "Horario actualizado correctamente."
@@ -44,7 +48,12 @@ def horarios(request):
     dias_horario = None
     if horario:
         dias_horario = list(zip(DIAS, DIAS_DISPLAY, [
-            (getattr(horario, f"{d}_entrada"), getattr(horario, f"{d}_salida"))
+            (
+                getattr(horario, f"{d}_entrada"),
+                getattr(horario, f"{d}_salida"),
+                getattr(horario, f"{d}_entrada_2"),
+                getattr(horario, f"{d}_salida_2"),
+            )
             for d in DIAS
         ]))
 
